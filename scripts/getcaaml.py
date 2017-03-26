@@ -10,12 +10,13 @@
 # Note that right now we just get the data and put each day into a
 # file. We will process this data down the road.
 
+import argparse
 import urllib2
+import time
 
-def getday(date, region):
-    print date
-    resp = urllib2.urlopen('http://avalanche.pc.gc.ca/CAAML-eng.aspx?d=%s&r=%d' \
-                    % (date, region))
+def getday(args, date):
+    resp = urllib2.urlopen('%s?d=%s&r=%d' \
+                    % (args.www, date, args.region))
     print resp
     data = resp.read()
     resp.close()
@@ -23,5 +24,22 @@ def getday(date, region):
     print data
 
 if __name__=="__main__":
-    print "Hello"
-    getday("2017-03-21", 1)
+
+    parser = argparse.ArgumentParser(
+        description='Pull CAAML data from a web server.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    
+    parser.add_argument('-d', '--days', type=int, default=1,
+                        help='Number of days to recover from CAAML server')
+    parser.add_argument('-s', '--start', default=time.strftime("%Y-%m-%d"),
+                        help='Start date for CAAML data (work backwards from here)')
+    parser.add_argument('-r', '--region', type=int, default=1,
+                        help='The region to pull the data from')
+    parser.add_argument('-w', '--www',
+                        default='http://avalanche.pc.gc.ca/CAAML-eng.aspx',
+                        help='The region to pull the data from')
+    args = parser.parse_args()
+
+    date = args.start
+    getday(args, date)
+
