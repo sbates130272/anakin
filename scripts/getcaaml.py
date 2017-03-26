@@ -13,8 +13,17 @@
 import argparse
 import urllib2
 import time
+import datetime
+from datetime import datetime, timedelta
 
-def getday(args, date):
+CAAML_DATE_FMT = "%Y-%m-%d"
+
+def getdays(args):
+    start = datetime.strptime(args.start, CAAML_DATE_FMT)
+    for date in (start - timedelta(x) for x in range(args.days)):
+        __getday(args, date.strftime(CAAML_DATE_FMT))
+
+def __getday(args, date):
     resp = urllib2.urlopen('%s?d=%s&r=%d' \
                     % (args.www, date, args.region))
     print resp
@@ -31,7 +40,7 @@ if __name__=="__main__":
     
     parser.add_argument('-d', '--days', type=int, default=1,
                         help='Number of days to recover from CAAML server')
-    parser.add_argument('-s', '--start', default=time.strftime("%Y-%m-%d"),
+    parser.add_argument('-s', '--start', default=time.strftime(CAAML_DATE_FMT),
                         help='Start date for CAAML data (work backwards from here)')
     parser.add_argument('-r', '--region', type=int, default=1,
                         help='The region to pull the data from')
@@ -40,6 +49,5 @@ if __name__=="__main__":
                         help='The region to pull the data from')
     args = parser.parse_args()
 
-    date = args.start
-    getday(args, date)
+    getdays(args)
 
